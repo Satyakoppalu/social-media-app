@@ -1,4 +1,7 @@
 # Social Media App
+A social media platform where users can connect, share posts, like, comment, and follow friends for a personalized feed.
+
+![Demo](demo.gif)
 
 ## Functionalities
 
