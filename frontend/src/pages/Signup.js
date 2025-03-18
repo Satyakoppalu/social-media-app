@@ -44,7 +44,7 @@ const SignupLogin=()=>{
             const res = await axios.post(url, formDataToSend, {
               headers: { "Content-Type": "multipart/form-data" },
             });
-            login(res.data.token);
+            login(res.data.token, res.data.userId);
             navigate("/");
         }else{
             const loginData={
@@ -54,7 +54,7 @@ const SignupLogin=()=>{
             const res = await axios.post(url, loginData, {
                 headers: { "Content-Type": "application/json" },
               });
-            login(res.data.token);
+            login(res.data.token, res.data.userId);
             navigate("/");
         }
           } catch (error) {

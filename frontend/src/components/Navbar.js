@@ -1,29 +1,213 @@
-import {Link} from "react-router-dom";
-import {useContext} from "react";
-import {AuthContext} from "../AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { AuthContext } from "../AuthContext";
+import axios from "axios";
 
-const Navbar=()=>{
-    const{user, logout}=useContext(AuthContext);
+const Navbar = () => {
+  const { user, logout } = useContext(AuthContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [postText, setPostText] = useState("");
+  const [postImage, setPostImage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+  const navigate = useNavigate(); // Initialize the navigate hook
 
-    return (
-        <nav className="navbar navbar-light bg-light">
-            <Link to="/" className="navbar-brand">Social App</Link>
-            <div>
-                
-                    {user?(
-                        <>
-                        <Link to="/profile" className="btn btn-outline-primary mx-2">Profile</Link>
-                        <button onClick={logout} className="btn btn-outline-danger">Logout</button>
-                        </>
-                    ):(
-                        <>
-                        <Link to="/signupLogin" className="btn btn-outline-primary mx-2">Sign up/Login</Link>  
-                        </>
-                    )}
-                
+  const handlePostChange = (e) => {
+    setPostText(e.target.value);
+  };
+
+  const handleImageChange = (e) => {
+    setPostImage(e.target.files[0]);
+  };
+
+  const handleCreatePost = async () => {
+    const formData = new FormData();
+    formData.append("text", postText);
+    if (postImage) {
+      formData.append("image", postImage);
+    }
+
+    try {
+      await axios.post("http://localhost:8000/api/posts/create", formData, {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      // Close modal after post creation
+      setIsModalOpen(false);
+      setPostText(""); // Clear the form
+      setPostImage(null); // Clear image
+    } catch (error) {
+      console.error("Error creating post:", error.response?.data?.message);
+    }
+  };
+
+  const handleCancel = () => {
+    // Clear form and close modal without creating a post
+    setPostText("");
+    setPostImage(null);
+    setIsModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/signupLogin"); // Redirect to login/signup page after logout
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+
+    if (searchQuery.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/users/search?query=${searchQuery}`,
+        {
+          headers: {
+            Authorization: `${token}`,
+          },
+        }
+      );
+      setSearchResults(response.data.users); // Assuming response has users array
+    } catch (error) {
+      console.error("Error searching for users:", error);
+    }
+  };
+
+  const handleSearchClick = (userId) => {
+    // Redirect to the user's profile page
+    navigate(`/user/${userId}`);
+    setSearchResults([]); // Clear search results
+    setSearchQuery(""); // Clear search input
+  };
+
+  return (
+    <nav className="navbar navbar-light bg-dark d-flex justify-content-between">
+      <Link to="/" className="navbar-brand text-white"style={{ marginLeft: '10px' }}>Social App</Link>
+
+      {/* Conditional rendering for logged-in user */}
+      {user && (
+        <form
+          className="d-flex mx-auto"
+          onSubmit={handleSearch}
+          style={{ width: "42%" ,paddingLeft: "175px" }}
+        >
+          <input
+            type="text"
+            className="form-control me-2"
+            placeholder="Search for users"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button type="submit" className="btn btn-outline-primary text-white">
+            Search
+          </button>
+
+          {/* Display search results */}
+          {searchQuery && searchResults.length > 0 && (
+            <div
+              className="dropdown-menu show"
+              style={{ position: "absolute", zIndex: 1050, width: "50%" }}
+            >
+              {searchResults.map((result) => (
+                <button
+                  key={result._id}
+                  className="dropdown-item"
+                  onClick={() => handleSearchClick(result._id)}
+                >
+                  {result.username}
+                </button>
+              ))}
             </div>
-        </nav>
-    );
+          )}
+        </form>
+      )}
+
+      <div>
+        {user ? (
+          <>
+            <button
+              className="btn btn-outline-primary mx-2 text-white"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Post
+            </button>
+            <Link to={`/user/${userId}`} className="btn btn-outline-primary mx-2 text-white">
+              Profile
+            </Link>
+            <button onClick={handleLogout} className="btn btn-outline-danger text-white" style={{ marginRight: '10px' }}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/signupLogin" className="btn btn-outline-primary mx-2 text-white">
+              Sign up/Login
+            </Link>
+          </>
+        )}
+      </div>
+
+      {/* Create Post Modal */}
+      {isModalOpen && (
+        <div
+          className="modal show"
+          style={{
+            display: "block",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 1050,
+          }}
+          onClick={handleCancel} // Close modal when clicking outside
+        >
+          <div
+            className="modal-dialog"
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Create Post</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCancel} // Close modal when clicking "X"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <textarea
+                  className="form-control mb-2"
+                  value={postText}
+                  onChange={handlePostChange}
+                  placeholder="What's on your mind?"
+                  rows="4"
+                ></textarea>
+                <input
+                  type="file"
+                  className="form-control mb-2"
+                  onChange={handleImageChange}
+                />
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={handleCancel}>
+                  Cancel
+                </button>
+                <button className="btn btn-primary" onClick={handleCreatePost}>
+                  Post
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
 };
 
 export default Navbar;

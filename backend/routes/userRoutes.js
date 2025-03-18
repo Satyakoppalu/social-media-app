@@ -20,7 +20,11 @@ router.post('/signup', upload.single('image'),async (req, res)=>{
         await newUser.save();
         const token=jwt.sign({id:newUser._id}, process.env.JWT_SECRET,{expiresIn:'1h'});
         
-        res.status(201).json({message:'User sucessfully created', token});
+        res.status(201).json({
+            message: 'User successfully created',
+            token,
+            userId: newUser._id, 
+        });
     } 
     catch(error){
         res.status(500).json({message:'Server error', error});
@@ -40,7 +44,11 @@ router.post('/login', async(req, res) =>{
         if(!isMatch) return res.status(400).json({message:'Invalid credentials'});
 
         const token=jwt.sign({id:user._id}, process.env.JWT_SECRET,{expiresIn:'1h'});
-        res.json({message:'Login successful', token});
+        res.status(201).json({
+            message: 'User successfully created',
+            token,
+            userId: user._id, 
+        });
     } 
     catch(error){
         res.status(500).json({message:'Server error', error});
@@ -118,5 +126,64 @@ router.delete('/delete-account/', authMiddleware, async(req, res)=>{
 
     }
 });
+
+router.put('/update-bio', authMiddleware, async(req, res)=>{
+    const userId=req.user.id;
+    const {bio}=req.body;
+
+    try{
+        const updatedUser= await User.findByIdAndUpdate(userId, {bio}, {new:true}).select('bio');
+        if (!updatedUser){
+            return res.status(404).json({message:"User not found"});
+        }
+        res.status(200).json({ message: "Bio updated successfully", user: updatedUser });
+    }
+    catch(error){
+        res.status(500).json({ message: "Error updating bio", error });
+    }
+});
+
+router.get('/user/:id', authMiddleware, async (req, res) => {
+    const { id } = req.params; 
+    const loggedInUserId = req.user.id; 
+    
+    try {
+      const user = await User.findById(id).select('username profileImageUrl bio followers following');
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const posts = await Post.find({ user: id })
+        .select('text imageUrl likes comments')
+        .populate('comments.user', 'username profileImageUrl') // Populate comment user details
+        .sort({ createdAt: -1 });
+
+      const isOwner = loggedInUserId.toString() === user._id.toString();
+  
+      res.status(200).json({
+        user,
+        posts,
+        isOwner,
+      });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      res.status(500).json({ message: 'Server error', error });
+    }
+});
+
+router.get('/search', authMiddleware, async (req, res) => {
+    const { query } = req.query;
+    try {
+      const users = await User.find({
+        username: { $regex: query, $options: 'i' }, 
+      }).select("username _id");
+  
+      res.status(200).json({ users });
+    } catch (error) {
+      res.status(500).json({ message: "Error searching for users", error });
+    }
+  });
+  
+
 
 module.exports=router;

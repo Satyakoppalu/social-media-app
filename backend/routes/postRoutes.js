@@ -24,17 +24,6 @@ router.post('/create', authMiddleware, upload.single('image'), async(req, res) =
 }
 );
 
-router.get('/', async(req, res)=>{
-    try{
-        const posts=await Post.find();
-        res.status(200).json(posts);
-    }
-    catch (error){
-        res.status(500).json({message:'Error fetching posts', error});
-    }
-});
-
-
 
 router.post('/like/:postId', authMiddleware, async(req, res)=>{
     const userId=req.user.id;
@@ -48,10 +37,12 @@ router.post('/like/:postId', authMiddleware, async(req, res)=>{
         const postOwner=await User.findById(post.user);
         const user =await User.findById(userId);
 
-        if (!user.following.includes(postOwner._id)){
-            return res.status(403).json({message:"You can follow posts of user you follow."});
+        if (!userId===postOwner){
 
-        }
+        if (!user.following.includes(postOwner._id)){
+            return res.status(403).json({message:"You can like posts of user you don't follow."});
+
+        }}
         if (post.likes.includes(userId)){
             return res.status(400).json({message:"You already liked this post."});
         }
@@ -115,10 +106,10 @@ router.post('/comment/:postId', authMiddleware, async(req, res)=>{
       const postOwner= await User.findById(post.user);
       const user= await User.findById(userId);
 
-      if (!user.following.includes(postOwner._id)){
-        return res.status(403).json({message:"You can only comment on posts of your friends."});
+    //   if (!user.following.includes(postOwner._id)){
+    //     return res.status(403).json({message:"You can only comment on posts of your friends."});
 
-      }
+    //   }
       const comment={user:userId, text, createdAt:new Date()};
       post.comments.push(comment);
       await post.save();
@@ -174,7 +165,8 @@ router.get('/home', authMiddleware, async(req, res)=>{
         const posts= await Post.find({
             user:{$in:followingUserIds}
         })
-        .populate('user', 'username')
+        .populate('user', 'username profileImageUrl')
+        .populate('comments.user', 'username profileImageUrl')
         .sort({createdAt:-1});
 
         res.status(200).json({posts});
@@ -183,6 +175,34 @@ router.get('/home', authMiddleware, async(req, res)=>{
     }
     catch(error){
         res.status(500).json({message:"Error fetching posts.", error});
+    }
+});
+
+
+router.delete('/delete/:postId', authMiddleware, async (req, res) => {
+    const userId = req.user.id; 
+    const { postId } = req.params; 
+
+    try {
+
+        const post = await Post.findById(postId);
+
+
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+
+        if (post.user.toString() !== userId) {
+            return res.status(403).json({ message: "You are not authorized to delete this post" });
+        }
+
+
+        await Post.deleteOne({ _id: postId });
+
+        res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting post", error });
     }
 });
 
