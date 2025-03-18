@@ -5,7 +5,7 @@ const router=express.Router();
 const mongoose = require('mongoose');
 
 
-//Follow a user
+
 router.post('/follow/:id', authMiddleware, async(req, res)=>{
     const userId=req.user.id;
     const followUserId=req.params.id;
@@ -19,14 +19,14 @@ router.post('/follow/:id', authMiddleware, async(req, res)=>{
         if (userId===followUserId){
             return res.status(400).json({message:"You cannot follow yourself."});
         }
-        //check if already following
+
         const user=await User.findById(userId);
         if (user.following.includes(followUserId)){
             return res.status(400).json({message:"You are already following this user"});
 
         }
 
-        // Add to following and followers
+
         user.following.push(followUserId);
         await user.save();
 
@@ -41,7 +41,7 @@ router.post('/follow/:id', authMiddleware, async(req, res)=>{
     }
 });
 
-//unfollow a user
+
 router.post('/unfollow/:id', authMiddleware, async(req, res)=>{
     const userId=req.user.id;
     const unfollowUserId=req.params.id;

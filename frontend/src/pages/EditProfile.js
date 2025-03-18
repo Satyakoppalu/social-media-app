@@ -71,32 +71,37 @@ const EditProfile=({user, onProfileUpdated, setEditing})=>{
 
     return (
     <div className="container mt-4">
-        <h2>Edit Profile</h2>
+        <h3>Edit Profile</h3>
+        <div className="d-flex justify-content-center align-items-center vh-10">
 
-        {/* Update Profile Picture */}
-        <form onSubmit={handleProfileUpdate}>
+        <form onSubmit={handleProfileUpdate}  className="text-center">
         <div className="mb-3">
             <label className="form-label">Profile Picture</label>
-            <input type="file" className="form-control" onChange={(e) => setProfilePic(e.target.files[0])} />
+            <input type="file" className="form-control" style={{ width: "600px" }} onChange={(e) => setProfilePic(e.target.files[0])} />
             <button type="submit" className="btn btn-primary mt-2">Update Profile Picture</button>
         </div>
         </form>
+        </div>
 
-        {/* Update Bio */}
-        <div className="mb-3">
+
+        <div className="d-flex justify-content-center align-items-center vh-10">
+        <div className="mb-4">
         <label className="form-label">Bio</label>
-        <textarea className="form-control" value={bio} onChange={(e) => setBio(e.target.value)} />
+        <textarea className="form-control"style={{ width: "600px" }} value={bio} onChange={(e) => setBio(e.target.value)} />
         <button className="btn btn-primary mt-2" onClick={handleBioUpdate}>Update Bio</button>
         </div>
-
-        {/* Change Password */}
-        <div className="mb-3">
-        <label className="form-label">New Password</label>
-        <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button className="btn btn-primary mt-2" onClick={handlePasswordUpdate}>Update Password</button>
         </div>
 
-        {/* Delete Account */}
+
+        <div className="d-flex justify-content-center align-items-center vh-10">
+        <div className="mb-3">
+        <label className="form-label">New Password</label>
+        <input type="password" className="form-control" style={{ width: "600px" }} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className="btn btn-primary mt-2" onClick={handlePasswordUpdate}>Update Password</button>
+        </div>
+        </div>
+
+
         <button className="btn btn-danger mt-4" onClick={handleDeleteAccount}>Delete Account</button>
     </div>
     );

@@ -12,7 +12,7 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
-  const navigate = useNavigate(); // Initialize the navigate hook
+  const navigate = useNavigate(); 
 
   const handlePostChange = (e) => {
     setPostText(e.target.value);
@@ -36,17 +36,15 @@ const Navbar = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      // Close modal after post creation
       setIsModalOpen(false);
-      setPostText(""); // Clear the form
-      setPostImage(null); // Clear image
+      setPostText(""); 
+      setPostImage(null); 
     } catch (error) {
       console.error("Error creating post:", error.response?.data?.message);
     }
   };
 
   const handleCancel = () => {
-    // Clear form and close modal without creating a post
     setPostText("");
     setPostImage(null);
     setIsModalOpen(false);
@@ -54,7 +52,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/signupLogin"); // Redirect to login/signup page after logout
+    navigate("/signupLogin"); 
   };
 
   const handleSearch = async (e) => {
@@ -74,24 +72,23 @@ const Navbar = () => {
           },
         }
       );
-      setSearchResults(response.data.users); // Assuming response has users array
+      setSearchResults(response.data.users); 
     } catch (error) {
       console.error("Error searching for users:", error);
     }
   };
 
   const handleSearchClick = (userId) => {
-    // Redirect to the user's profile page
     navigate(`/user/${userId}`);
-    setSearchResults([]); // Clear search results
-    setSearchQuery(""); // Clear search input
+    setSearchResults([]); 
+    setSearchQuery(""); 
   };
 
   return (
     <nav className="navbar navbar-light bg-dark d-flex justify-content-between">
       <Link to="/" className="navbar-brand text-white"style={{ marginLeft: '10px' }}>Social App</Link>
 
-      {/* Conditional rendering for logged-in user */}
+      
       {user && (
         <form
           className="d-flex mx-auto"
@@ -109,7 +106,7 @@ const Navbar = () => {
             Search
           </button>
 
-          {/* Display search results */}
+
           {searchQuery && searchResults.length > 0 && (
             <div
               className="dropdown-menu show"
@@ -154,7 +151,7 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Create Post Modal */}
+
       {isModalOpen && (
         <div
           className="modal show"
@@ -165,11 +162,11 @@ const Navbar = () => {
             left: 0,
             zIndex: 1050,
           }}
-          onClick={handleCancel} // Close modal when clicking outside
+          onClick={handleCancel} 
         >
           <div
             className="modal-dialog"
-            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
+            onClick={(e) => e.stopPropagation()} 
           >
             <div className="modal-content">
               <div className="modal-header">
@@ -177,7 +174,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={handleCancel} // Close modal when clicking "X"
+                  onClick={handleCancel} 
                 ></button>
               </div>
               <div className="modal-body">

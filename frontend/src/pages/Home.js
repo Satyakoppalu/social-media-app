@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ThumbUpRoundedIcon from '@mui/icons-material/ThumbUpRounded';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -15,7 +17,6 @@ const Home = () => {
 
   const fetchPosts = async () => {
     const headers = { Authorization: `${token}` };
-    // console.log("Request headers:", headers);
     try {
       const res = await axios.get("http://localhost:8000/api/posts/home", {
         headers: { Authorization: `${token}` },
@@ -75,7 +76,6 @@ const Home = () => {
 
   return (
     <div className="container mt-4">
-      {/* Posts Section */}
       {posts.length === 0 ? (
         <p className="text-center">No posts yet</p>
       ) : (
@@ -117,24 +117,29 @@ const Home = () => {
                       </div>
                     )}
   
-                    {/* Likes */}
+                 
                     <div className="d-flex align-items-center mt-2">
-                      <button
-                        className="btn btn-outline-primary me-2"
-                        onClick={() =>
-                          post.likes.includes(localStorage.getItem("userId"))
-                            ? handleUnlike(post._id)
-                            : handleLike(post._id)
-                        }
-                      >
-                        {post.likes.includes(localStorage.getItem("userId"))
-                          ? "Unlike"
-                          : "Like"}{" "}
-                        ({post.likes.length})
-                      </button>
+                    <button
+                    className="btn d-flex align-items-center"
+                    onClick={() =>
+                      post.likes.includes(localStorage.getItem("userId"))
+                        ? handleUnlike(post._id)
+                        : handleLike(post._id)
+                    }
+                  >
+                    {post.likes.includes(localStorage.getItem("userId")) ? (
+                      <ThumbUpRoundedIcon fontSize="medium" style={{ color: "#007bff" }} className="me-1" />
+                    ) : (
+                      <ThumbUpOutlinedIcon fontSize="medium"  style={{ color: "#007bff" }} className="me-1" />
+                    )}
+                    <small className="text-muted "style={{ fontSize: "medium" }}>{post.likes.length}</small>
+
+                  </button>
+                  
                     </div>
+
   
-                    {/* Comments Section */}
+
                     <div className="mt-3">
                       <h6>Comments</h6>
                       {post.comments.length > 0 ? (
@@ -169,7 +174,7 @@ const Home = () => {
                       )}
                     </div>
   
-                    {/* Add Comment */}
+
                     <div className="mt-2">
                       <input
                         type="text"

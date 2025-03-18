@@ -4,6 +4,8 @@ import axios from "axios";
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditProfile from "./EditProfile";
+import ThumbUpRoundedIcon from '@mui/icons-material/ThumbUpRounded';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 
 const Profile = () => {
   const { id } = useParams();
@@ -68,7 +70,7 @@ const Profile = () => {
     }
   };
 
-  // Like/Unlike Post
+
   const handleLike = async (postId) => {
     try {
       await axios.post(`http://localhost:8000/api/posts/like/${postId}`, {}, {
@@ -91,7 +93,7 @@ const Profile = () => {
     }
   };
 
-  // Add Comment
+
   const handleComment = async (postId) => {
     if (!commentText[postId]) return;
 
@@ -106,7 +108,7 @@ const Profile = () => {
     }
   };
 
-  // Delete Comment
+
   const handleDeleteComment = async (postId, commentId) => {
     try {
       await axios.delete(`http://localhost:8000/api/posts/comment/${postId}/${commentId}`, {
@@ -133,7 +135,7 @@ const Profile = () => {
     <div className="container mt-4">
   {user ? (
     <>
-      {/* Profile Section */}
+
       <div className="text-center mb-4">
         <img
           src={user.profileImageUrl || ""}
@@ -164,7 +166,19 @@ const Profile = () => {
             Edit Profile
           </button>
         ) : (
-          isOwner && <EditProfile user={user} onProfileUpdated={setUser} setEditing={setEditing} />
+          isOwner && (
+            <div className="position-relative">
+              <button
+                className="btn btn position-absolute top-0 end-0 m-2 fs-4"
+                onClick={() => setEditing(false)} 
+              >
+                ✖
+              </button>
+        
+
+              <EditProfile user={user} onProfileUpdated={setUser} setEditing={setEditing} />
+            </div>
+          )
         )}
 
         {!isOwner && (
@@ -177,7 +191,7 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Posts Section */}
+
       <h4 className="mt-4 text-center">Posts</h4>
       {posts.length === 0 ? (
         <p className="text-center">No posts yet</p>
@@ -188,7 +202,7 @@ const Profile = () => {
               <div key={post._id} className="col-20 mb-4">
                 <div className="card">
                   <div className="card-body position-relative">
-                    {/* Delete Post Button */}
+
                     {isOwner && (
                       <IconButton
                         aria-label="delete"
@@ -219,24 +233,28 @@ const Profile = () => {
                       </div>
                     )}
 
-                    {/* Likes */}
+
                     <div className="d-flex align-items-center mt-2">
-                      <button
-                        className="btn btn-outline-primary me-2"
-                        onClick={() =>
-                          post.likes.includes(localStorage.getItem("userId"))
-                            ? handleUnlike(post._id)
-                            : handleLike(post._id)
-                        }
-                      >
-                        {post.likes.includes(localStorage.getItem("userId"))
-                          ? "Unlike"
-                          : "Like"}{" "}
-                        ({post.likes.length})
-                      </button>
+                    <button
+                    className="btn d-flex align-items-center"
+                    onClick={() =>
+                      post.likes.includes(localStorage.getItem("userId"))
+                        ? handleUnlike(post._id)
+                        : handleLike(post._id)
+                    }
+                  >
+                    {post.likes.includes(localStorage.getItem("userId")) ? (
+                      <ThumbUpRoundedIcon fontSize="medium" style={{ color: "#007bff" }} className="me-1" />
+                    ) : (
+                      <ThumbUpOutlinedIcon fontSize="medium"  style={{ color: "#007bff" }} className="me-1" />
+                    )}
+                    <small className="text-muted "style={{ fontSize: "medium" }}>{post.likes.length}</small>
+
+                  </button>
+                  
                     </div>
 
-                    {/* Comments Section */}
+
                     <div className="mt-3">
                       <h6>Comments</h6>
                       {post.comments.length > 0 ? (
@@ -270,7 +288,7 @@ const Profile = () => {
                       )}
                     </div>
 
-                    {/* Add Comment */}
+
                     <div className="mt-2">
                       <input
                         type="text"
