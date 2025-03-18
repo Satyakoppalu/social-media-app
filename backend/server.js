@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 app.get('/', (req, res) => {
-    res.send('Social Media App Backend')
+    res.send('Social Media App Backend.')
 });
 
 
